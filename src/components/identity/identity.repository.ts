@@ -3,7 +3,7 @@ import  validator   from "validator";
 import  dbPool  from "@/core/DataBaseConnection";
 import { IRepository } from "@/core/IRepository";
 import { IUser, IUserUpdate, User } from "@/contracts/user";
-import { comparePassword, generateAuthToken, getParameterClause} from "../../utils/helpers";
+import { comparePassword, generateAuthToken, getInsertStr, getParameterClause} from "../../utils/helpers";
 import { hashPassword } from "../../utils/hooks";
 
 class IdentityRepository implements IRepository<IUser> {
@@ -32,10 +32,12 @@ class IdentityRepository implements IRepository<IUser> {
     }
 
     async create(data: User): Promise<IUser> {
-        const { email, password, phone } = data;
-        const hashedPassword = await hashPassword(password);
-        const query = `INSERT INTO users (email, password, phone) VALUES ($1, $2, $3) RETURNING *`;
-        const { rows } = await this.pool.query(query, [email, hashedPassword, phone]);
+        const { password } = data;
+        data.password = await hashPassword(password);
+        const { insertStr, valuesArr} = getInsertStr(data);
+
+        const query = `INSERT INTO users ${insertStr}`;
+        const { rows } = await this.pool.query(query, valuesArr);
         return rows[0];
     }
 

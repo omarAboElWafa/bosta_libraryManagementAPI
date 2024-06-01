@@ -78,3 +78,9 @@ export const getParameterClause = (query : {}, defaultOperator : string = 'AND')
     }).join(` ${defaultOperator} `);
     return {parameterClause: parameterClause, valuesArr: Object.values(query)};
 }
+
+export const getInsertStr = (data : {}) : {insertStr: string, valuesArr: never[]} => {
+    const keys = Object.keys(data);
+    const insertStr = `(${keys.join(', ')}) VALUES (${keys.map((key, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
+    return {insertStr: insertStr, valuesArr: Object.values(data)};
+}
