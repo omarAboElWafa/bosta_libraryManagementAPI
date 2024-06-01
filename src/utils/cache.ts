@@ -8,7 +8,7 @@ export const getClient = async () => {
 export const tokenClientPool = new Redis(redisConfig);
 
 // get data from cache
-export const getFromCache = (client:Redis, key: string): Promise<string | null> => {
+export const getFromCache = async (client:Redis, key: string): Promise<string | null> => {
   return client.get(key).then((data) => {
     return data;
   }).catch((err) => {
@@ -17,7 +17,7 @@ export const getFromCache = (client:Redis, key: string): Promise<string | null> 
 };
   
 // set data to cache with expiration time
-export const setToCache = (client:Redis, key: string, value: string, expirationTimeInMinutes: number): Promise<string> => {
+export const setToCache = async (client:Redis, key: string, value: string, expirationTimeInMinutes: number): Promise<string> => {
   return client.set(key, value, 'EX', expirationTimeInMinutes * 60).then((data) => {
     return data;
   }).catch((err) => {
@@ -26,7 +26,7 @@ export const setToCache = (client:Redis, key: string, value: string, expirationT
 }
 
 // delete data from cache
-export const deleteFromCache = (client:Redis, key: string) : Promise<number> => {
+export const deleteFromCache = async (client:Redis, key: string) : Promise<number> => {
   return client.del(key).then(
     (data) => {
       return data;
@@ -37,7 +37,7 @@ export const deleteFromCache = (client:Redis, key: string) : Promise<number> => 
 }
 
 // delete all data from cache
-export const clearCache = (client:Redis) :Promise<string> => {
+export const clearCache = async(client:Redis) :Promise<string> => {
   return client.flushall().then((data)=> {
     return data;
   }).catch((err) => {
