@@ -1,0 +1,34 @@
+version: "3.5"
+
+services:
+  express-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 4242:3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/dist
+    env_file:
+      - .env
+    restart: on-failure
+
+  postgresql:
+    image: postgres
+    hostname: postgres
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql/data
+    env_file:
+      - .env
+    restart: on-failure
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    restart: on-failure
