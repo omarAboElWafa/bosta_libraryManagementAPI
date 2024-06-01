@@ -49,3 +49,6 @@ export const OTP_VALIDITY_PERIOD : number = parseInt(process.env.OTP_VALIDITY_PE
 
 // Book Configs
 export const BOOK_EXPIRY_FOR_CACHE : number = parseInt(process.env.BOOK_EXPIRY_FOR_CACHE || "60");  
+
+// Loan Configs
+export const MAX_DURATION_BORROW_DAYS : number = parseInt(process.env.MAX_DURATION_BORROW_DAYS || "14");

@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { generate } from 'otp-generator';
 import {NodemailerService, MailSender} from './mailService';
-import { SENDER_MAIL, RESET_PASSWORD_TOKEN_SECRET } from './config';
+import { SENDER_MAIL, RESET_PASSWORD_TOKEN_SECRET, MAX_DURATION_BORROW_DAYS } from './config';
 import { IUser } from '@/contracts/user';
 import * as sms from './sms';
 
@@ -83,4 +83,13 @@ export const getInsertStr = (data : {}) : {insertStr: string, valuesArr: never[]
     const keys = Object.keys(data);
     const insertStr = `(${keys.join(', ')}) VALUES (${keys.map((key, index) => `$${index + 1}`).join(', ')}) RETURNING *`;
     return {insertStr: insertStr, valuesArr: Object.values(data)};
+}
+
+export const isValidDueDate = (dueDate : string) => {
+    // example dueDate format: '2021-12-31'
+    const today = new Date();
+    const due = new Date(dueDate);
+    const diffTime = Math.abs(due.getTime() - today.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= MAX_DURATION_BORROW_DAYS;
 }
