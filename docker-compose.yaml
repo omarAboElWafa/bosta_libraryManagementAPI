@@ -32,3 +32,20 @@ services:
     ports:
       - 6379:6379
     restart: on-failure
+
+  migrate:
+    image: node:14
+    working_dir: /app
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    command: >
+      sh -c "
+      npm install &&
+      npm run build &&
+      npx node-pg-migrate up -j dist/pg-migrate.config.js
+      "
+    depends_on:
+      - postgresql
+    restart: on-failure

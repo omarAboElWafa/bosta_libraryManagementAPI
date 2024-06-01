@@ -7,7 +7,8 @@
     "start": "ts-node src/index.ts",
     "start:prod": "node dist/index.js",
     "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "migrate": "npx node-pg-migrate up -j dist/pg-migrate.config.js"
   },
   "author": "omarAboElWafa",
   "license": "ISC",
@@ -19,6 +20,7 @@
     "google-libphonenumber": "^3.2.34",
     "ioredis": "^5.4.1",
     "jsonwebtoken": "^9.0.2",
+    "node-pg-migrate": "^7.4.0",
     "nodemailer": "^6.9.13",
     "otp-generator": "^4.0.1",
     "pg": "^8.11.5",
