@@ -15,4 +15,4 @@ export interface IBookUpdate {
     shelf_location?: string
 }
 
-export type Book = Omit<IBook, 'id'>;
+export type TBook = Omit<IBook, 'id'>;

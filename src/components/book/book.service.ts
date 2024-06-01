@@ -1,17 +1,17 @@
-import Identity from './book.repository'; 
-import { IBook, Book, IBookUpdate } from '@/contracts/book';
+import Book from './book.repository'; 
+import { IBook, TBook, IBookUpdate } from '@/contracts/book';
 import * as cache from "../../utils/cache";
 import { BOOK_EXPIRY_FOR_CACHE } from '../../utils/config';
 
 class BookService {
-    private identityRepository: Identity;
+    private bookRepository: Book;
     constructor(){
-        this.identityRepository = new Identity();
+        this.bookRepository = new Book();
     }
 
     async getAll(): Promise<IBook[]> {
         try{
-            const books = await this.identityRepository.getAll();
+            const books = await this.bookRepository.getAll();
             return books;
         } catch(err){
             throw new Error(err.message);
@@ -20,16 +20,16 @@ class BookService {
 
     async getById(id: string): Promise<IBook | null> {
         try{
-            const book = await this.identityRepository.getById(id);
+            const book = await this.bookRepository.getById(id);
             return book;
         } catch(err){
             throw new Error(err.message);
         }
     }
 
-    async create(data: Book): Promise<IBook> {
+    async create(data: TBook): Promise<IBook> {
         try{
-            const book = await this.identityRepository.create(data);
+            const book = await this.bookRepository.create(data);
             return book;
         } catch(err){
             throw new Error(err.message);
@@ -38,7 +38,7 @@ class BookService {
 
     async update(id: string, data: IBookUpdate): Promise<IBook> {
         try{
-            const book = await this.identityRepository.update(id, data);
+            const book = await this.bookRepository.update(id, data);
             return book;
         } catch(err){
             throw new Error(err.message);
@@ -47,7 +47,7 @@ class BookService {
 
     async delete(id: string): Promise<void> {
         try{
-            await this.identityRepository.delete(id);
+            await this.bookRepository.delete(id);
         } catch(err){
             throw new Error(err.message);
         }
@@ -55,7 +55,7 @@ class BookService {
 
     async search(query: IBook): Promise<IBook> {
         try{
-            const book = await this.identityRepository.search(query);
+            const book = await this.bookRepository.search(query);
             return book;
         } catch(err){
             throw new Error(err.message);

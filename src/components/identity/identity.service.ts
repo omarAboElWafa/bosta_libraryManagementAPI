@@ -20,7 +20,7 @@ class IdentityService {
 
     findUserByEmail = async (email: string) => {
         try{
-            return await this.identityRepository.getOneBy({email: email});
+            return await this.identityRepository.getOneOrManyBy({email: email});
         } catch(error){
             throw error;
         }
@@ -28,7 +28,7 @@ class IdentityService {
 
     findUserByPhone = async (phone: string) => {
         try{
-            return await this.identityRepository.getOneBy({phone: phone});
+            return await this.identityRepository.getOneOrManyBy({phone: phone});
         } catch(error){
             throw error;
         }

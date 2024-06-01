@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { verifyAccessToken, verifyRefreshToken, verifyAdminToken } from "../../utils/middlewares";
-import IdentityController from './book.controller';
+import { verifyAccessToken, verifyAdminToken } from "../../utils/middlewares";
+import BookController from './book.controller';
 
 class BookRouter{
-    bookController : IdentityController;
-    constructor(bookController: IdentityController){
+    bookController : BookController;
+    constructor(bookController: BookController){
         this.bookController = bookController;
     }
     getRouter = () => {
