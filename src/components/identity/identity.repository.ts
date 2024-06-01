@@ -2,7 +2,7 @@ import { Pool } from "pg";
 import  validator   from "validator";
 import  dbPool  from "@/core/DataBaseConnection";
 import { IRepository } from "@/core/IRepository";
-import { IUser, IUserUpdate } from "@/contracts/user";
+import { IUser, IUserUpdate, User } from "@/contracts/user";
 import { comparePassword, generateAuthToken, getParameterClause} from "../../utils/helpers";
 import { hashPassword } from "../../utils/hooks";
 
@@ -31,7 +31,7 @@ class IdentityRepository implements IRepository<IUser> {
         return rows[0] || null;
     }
 
-    async create(data: IUser): Promise<IUser> {
+    async create(data: User): Promise<IUser> {
         const { email, password, phone } = data;
         const hashedPassword = await hashPassword(password);
         const query = `INSERT INTO users (email, password, phone) VALUES ($1, $2, $3) RETURNING *`;

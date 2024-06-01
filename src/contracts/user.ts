@@ -17,3 +17,5 @@ export interface IUserUpdate {
     type?: string
     registered_date?: string
 }
+
+export type User = Omit<IUser, 'id'>;

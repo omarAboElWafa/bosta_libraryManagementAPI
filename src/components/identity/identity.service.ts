@@ -1,5 +1,5 @@
 import Identity from './identity.repository'; 
-import { IUser } from '@/contracts/user';
+import { IUser, User } from '@/contracts/user';
 import * as cache from "../../utils/cache";
 import { REFRESH_TOKEN_EXPIRY_FOR_CACHE } from '../../utils/config';
 
@@ -9,7 +9,7 @@ class IdentityService {
         this.identityRepository = new Identity();
     }
 
-    addUser = async (user: IUser) => {
+    addUser = async (user: User) => {
         try{
             const newUSer = await this.identityRepository.create(user);
             return newUSer;
@@ -17,9 +17,18 @@ class IdentityService {
             throw error;
         }
     }
+
     findUserByEmail = async (email: string) => {
         try{
             return await this.identityRepository.getOneBy({email: email});
+        } catch(error){
+            throw error;
+        }
+    }
+
+    findUserByPhone = async (phone: string) => {
+        try{
+            return await this.identityRepository.getOneBy({phone: phone});
         } catch(error){
             throw error;
         }

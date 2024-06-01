@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import UserService from "./identity.service";
 import * as helpers from "../../utils/helpers";
 import { handleValidationError } from "../../utils/loggers";
-import { IUser, UserInput } from "@/contracts/user";
+import { IUser, IUserUpdate, User } from "@/contracts/user";
 import { ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY_FOR_CACHE, OTP_TOKEN_EXPIRY_FOR_CACHE, ACCESS_TOKEN_EXPIRY_FOR_CACHE, RESET_PASSWORD_TOKEN_EXPIRY_FOR_CACHE } from "../../utils/config";
 
 class UserController {
@@ -13,12 +13,8 @@ class UserController {
 
     register = async (req: Request, res: Response) => {
         try{
-            const {firstName, lastName, email, password, phone, gender, birthDate} =req.body;
-            const username = helpers.usernameFromEmail(email);
-            const verified = false;
-            const qualified = false;
-            const isAdmin = false;
-            const user : UserInput<IUser> = { firstName, lastName, email, username, password, verified, phone, qualified, isAdmin, gender, birthDate};
+            const {name, email, password, phone, type, registered_date} =req.body;
+            const user : User = { name, email, password, phone, type, registered_date};
             return res.status(201).send(await this.userService.addUser(user));
         }
         catch(error){
@@ -43,16 +39,16 @@ class UserController {
             const refreshToken = await helpers.generateAuthToken(user, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY);
             
             // Check if the user's refresh token is blacklisted
-            const isBlacklisted = await this.userService.isRefreshTokenBlacklisted(user._id);
-            const whiteListed = isBlacklisted? await this.userService.whitelistRefreshToken(user._id) : true;
+            const isBlacklisted = await this.userService.isRefreshTokenBlacklisted(user.id);
+            const whiteListed = isBlacklisted? await this.userService.whitelistRefreshToken(user.id) : true;
 
             if(!whiteListed){
                 return res.status(500).send({message: "Something went wrong"});
             }
             
             // Store the refresh token in redis
-            const refreshStored = this.userService.storeToken(user._id, refreshToken, REFRESH_TOKEN_EXPIRY_FOR_CACHE);
-            const accessStored = this.userService.storeToken(`access-${user._id}`, accessToken, ACCESS_TOKEN_EXPIRY_FOR_CACHE);
+            const refreshStored = this.userService.storeToken(user.id, refreshToken, REFRESH_TOKEN_EXPIRY_FOR_CACHE);
+            const accessStored = this.userService.storeToken(`access-${user.id}`, accessToken, ACCESS_TOKEN_EXPIRY_FOR_CACHE);
             if(!refreshStored || !accessStored){
                 return res.status(500).send({message: "Something went wrong"});
             }
@@ -149,7 +145,7 @@ class UserController {
                 return res.status(404).send({message: "User not found"});
             }
             const newAccessToken = await helpers.generateAuthToken(user, ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRY);
-            const accessStored = this.userService.storeToken(`access-${user._id}`, newAccessToken, REFRESH_TOKEN_EXPIRY_FOR_CACHE);
+            const accessStored = this.userService.storeToken(`access-${user.id}`, newAccessToken, REFRESH_TOKEN_EXPIRY_FOR_CACHE);
             if(!accessStored){
                 return res.status(500).send({message: "Something went wrong"});
             }
@@ -170,7 +166,7 @@ class UserController {
                 return res.status(404).send({message: "No user found with this email"});
             }
             const otp = helpers.generateOTP();
-            const otpStored = this.userService.storeToken(`reset-password-${user._id}`, otp, RESET_PASSWORD_TOKEN_EXPIRY_FOR_CACHE);
+            const otpStored = this.userService.storeToken(`reset-password-${user.id}`, otp, RESET_PASSWORD_TOKEN_EXPIRY_FOR_CACHE);
             if(!otp || !otpStored){
                 return res.status(500).send({message: "Something went wrong, Internal server error"});
             }
@@ -182,7 +178,7 @@ class UserController {
                 <title>Change Password</title>
             </head>
             <div dir="rtl" style="text-align: center;">
-                <p>Hello ${user.firstName},</p>
+                <p>Hello ${user.name},</p>
                 <p>You have requested a password reset for your communication application. To complete the process, enter the following One-Time Password (OTP) on the password reset page:</p>
                 <p style="text-align: center; font-size: 18px;"><strong>${otp}</strong></p>
                 <span>The one-time password is valid for 10 minutes. If not used within that time, you will need to request a new one.</span>
@@ -212,7 +208,7 @@ class UserController {
             if(!user){
                 return res.status(404).send({message: "Invalid user"});
             }
-            const retrievedOtp = await this.userService.findToken(`reset-password-${user._id}`);
+            const retrievedOtp = await this.userService.findToken(`reset-password-${user.id}`);
             if(!retrievedOtp){
                 return res.status(401).send({message: "OTP expired"});
             }
@@ -220,7 +216,7 @@ class UserController {
                 return res.status(401).send({message: "Invalid OTP"});
             }
             const accessToken = await helpers.generateAuthToken(user, ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRY);
-            const accessStored = this.userService.storeToken(`access-${user._id}`, accessToken, ACCESS_TOKEN_EXPIRY_FOR_CACHE);
+            const accessStored = this.userService.storeToken(`access-${user.id}`, accessToken, ACCESS_TOKEN_EXPIRY_FOR_CACHE);
             if(!accessStored){
                 return res.status(500).send({message: "Something went wrong"});
             }
@@ -279,76 +275,6 @@ class UserController {
         }
     };
 
-    verifyEmail = async (req: Request, res: Response) => {
-        try{
-            const {email, otp, userID} = req.body;
-            const user = await this.userService.findUserByEmail(email);
-            if(!user){
-                return res.status(404).send({message: "User not found"});
-            }
-
-
-            if(user.verified){
-                return res.status(200).send({message: "Email already verified"});
-            }
-
-            const retrievedOtp = await this.userService.findToken(`email-otp-${user._id}`);
-            if(!retrievedOtp){
-                return res.status(401).send({message: "OTP expired"});
-            }
-
-            if(retrievedOtp !== otp){
-                return res.status(401).send({message: "Invalid OTP"});
-            }
-
-            const verifyEmail = await this.userService.updateUser(user._id, {verified: true});
-            if(!verifyEmail){
-                return res.status(500).send({message: "Internal server error"});
-            }
-
-            return res.status(200).send({message: "Email verified successfully"});
-        }
-        catch(error){
-            console.log(error);
-            return res.status(400).send(handleValidationError(error));
-        }
-    }
-
-    verifyPhone = async (req: Request, res: Response) => {
-        try {
-            const { phone, otp, userID } = req.body;
-            const user = await this.userService.findUserByUniqueAttribute('phone', phone, true);
-            if(!user){
-                return res.status(404).send({message: "User not found"});
-            }
-            if(user._id.toString() !== userID){
-                return res.status(401).send({message: "Unauthorized user"});
-            }
-
-            if(user.qualified){
-                return res.status(200).send({message: "Phone already verified"});
-            }
-
-            const retrievedOtp = await this.userService.findToken(`phone-otp-${user._id}`);
-            if(!retrievedOtp){
-                return res.status(401).send({message: "No OTP generated or OTP expired"});
-            }
-
-            if(retrievedOtp !== otp){
-                return res.status(401).send({message: "Invalid OTP"});
-            }
-
-            const verifyPhone = await this.userService.updateUser(user._id, {qualified: true});
-            if(!verifyPhone){
-                return res.status(500).send({message: "Something went wrong"});
-            }
-
-            return res.status(200).send({message: "Phone verified successfully"});
-        } catch (error) {
-            console.log(error);
-            return res.status(400).send(handleValidationError(error));
-        }
-    }
 
     issueOTP = async (req: Request, res: Response) => {
         try {
@@ -367,7 +293,7 @@ class UserController {
             }
 
             if(email){
-                const user = await this.userService.findUserByUniqueAttribute('email', email, true);
+                const user = await this.userService.findUserByEmail(email);
                 if(!user){
                     return res.status(404).send({ message : 'No user found' });                
                 }
@@ -375,14 +301,14 @@ class UserController {
                 if(!emailSent){
                     return res.status(500).send({message: "Something went wrong"});
                 }
-                const otpStored =  this.userService.storeToken(`email-otp-${user._id}`, otp, OTP_TOKEN_EXPIRY_FOR_CACHE);
+                const otpStored =  this.userService.storeToken(`email-otp-${user.id}`, otp, OTP_TOKEN_EXPIRY_FOR_CACHE);
                 if(!otpStored){
                     return res.status(500).send({message: "Something went wrong"});
                 }
             }
 
             if(phone){
-                const user = await this.userService.findUserByUniqueAttribute('phone', phone, true);
+                const user = await this.userService.findUserByPhone(phone);
                 if(!user){
                     return res.status(404).send({ message : 'No user found' });
                 }
@@ -390,7 +316,7 @@ class UserController {
                 if(!mobileSent){
                     return res.status(500).send({message: "Something went wrong"});
                 }
-                const otpStored =  this.userService.storeToken(`phone-otp-${user._id}`, otp, OTP_TOKEN_EXPIRY_FOR_CACHE);
+                const otpStored =  this.userService.storeToken(`phone-otp-${user.id}`, otp, OTP_TOKEN_EXPIRY_FOR_CACHE);
                 if(!otpStored){
                     return res.status(500).send({message: "Something went wrong"});
                 }
@@ -448,10 +374,7 @@ class UserController {
 
     deleteUser = async (req: Request, res: Response) => {
         try{
-            const deleted = await this.userService.deleteUser(req.params.id);
-            if(!deleted){
-                return res.status(404).send({message: "User not found"});
-            }
+            await this.userService.deleteUser(req.params.id);
             return res.status(200).send({message: "User deleted successfully"});
         }
         catch(error){
@@ -460,35 +383,7 @@ class UserController {
         }
     }
 
-    registerAdmin = async (req: Request, res: Response) => {
-        try{
-            const {firstName, lastName, email, password, phone} =req.body;
-            const username = helpers.usernameFromEmail(email);
-            const verified = true;
-            const qualified = true;
-            const isAdmin = true;
-            const user : UserInput<IUser> = { firstName, lastName, email, username, password, verified, phone, qualified, isAdmin};
-            return res.status(201).send(await this.userService.addUser(user));
-        }
-        catch(error){
-            console.log(error);
-            return res.status(400).send(handleValidationError(error));
-        }
-    }
 
-    getAllAdmins = async (req: Request, res: Response) => {
-        try{
-            const users = await this.userService.getAllAdmins();
-            if(!users){
-                return res.status(404).send({message: "No admins found"});
-            }
-            return res.status(200).send(users);
-        }
-        catch(error){
-            console.log(error);
-            return res.status(400).send(handleValidationError(error));
-        }
-    }
 }
 
 export default UserController;
