@@ -1,18 +1,25 @@
 import express, { Express } from 'express';
+import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import routes from './loaders/routes';
-import { PORT} from './utils/config';
+import { PORT, NODE_ENV} from './utils/config';
 import  connectToDB  from './core/DataBaseConnection';
 
 
 async function startServer() : Promise<void> {
     const app : Express = express();
     
-
     // Midlewares
     app.use(express.json({limit: "50mb"}));
     app.use(express.urlencoded({ limit:"50mb", extended: true}));
     app.use(cors());
+    if(NODE_ENV === 'production'){
+        const limiter = rateLimit({
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            max: 100 // limit each IP to 100 requests per windowMs
+        });
+        app.use(limiter);
+    }
     // Load routes
     routes(app);
 

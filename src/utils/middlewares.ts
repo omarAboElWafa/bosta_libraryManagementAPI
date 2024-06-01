@@ -1,3 +1,4 @@
+import { body, validationResult } from 'express-validator';
 import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
@@ -123,6 +124,40 @@ export const verifyAdminToken = async (req: Request, res: Response, next : NextF
     }
 }
 
+export const validateNewUserFields = (req: Request, res: Response, next: NextFunction) => {
+    const { name, email, password, phone } = req.body;
+    if(!name || !email || !password || !phone){
+        return res.status(400).send({message: 'All fields are required'});
+    }
+    body('name').trim().escape();
+    body('email').isEmail().normalizeEmail();
+    next();
+}
 
+export const verifyPasswordLength = (req: Request, res: Response, next: NextFunction) => {
+    const { password } = req.body;
+    if(!password || password.length < 8){
+        return res.status(400).send({message: 'Password must be at least 8 characters long'});
+    }
+    next();
+}
+
+export const verifyUserUpdateFields = (req: Request, res: Response, next: NextFunction) => {
+    const { name, email, phone } = req.body;
+    if(!name && !email && !phone){
+        return res.status(400).send({message: 'At least one field is required to update user'});
+    }
+    body('name').trim().escape();
+    body('email').isEmail().normalizeEmail();
+    next();
+}
+
+export const checkValidationErrors = (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).send({message: errors.array()});
+    }
+    next();
+}
 
 
