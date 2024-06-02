@@ -1,0 +1,921 @@
+{
+	"info": {
+		"_postman_id": "e61c5f8c-628f-4d98-9507-a59661e4bfcb",
+		"name": "Library Management System API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17178333"
+	},
+	"item": [
+		{
+			"name": "Identity(Auth-User)",
+			"item": [
+				{
+					"name": "User",
+					"item": [
+						{
+							"name": "Get the user own profile",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/users/me",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"users",
+										"me"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update own profile",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"AbdElAziz\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/users/update-profile",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"users",
+										"update-profile"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "sign up",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\" : \"Ghaker\",\r\n    \"email\" : \"jamide4124@cosb.com\",\r\n    \"password\" : \"Asa$ddsdfdfa5434%\",\r\n    \"phone\" : \"+201012560799\",\r\n    \"type\": \"Borrower\", // 'Admin' or 'Borrower'\r\n    \"registered_date\": \"1990-12-14\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/register",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check if there is a response\r",
+									"if (pm.response && pm.response.json) {\r",
+									"    try {\r",
+									"        // Parse the response body as JSON\r",
+									"        const responseBody = pm.response.json();\r",
+									"\r",
+									"        // Check if the accessToken field is present in the response\r",
+									"        if (responseBody && responseBody.accessToken) {\r",
+									"            // Extract the accessToken from the response body\r",
+									"            const accessToken = responseBody.accessToken;\r",
+									"            console.log(accessToken);\r",
+									"            // Set the environment variable \"access\" with the extracted accessToken\r",
+									"            pm.collectionVariables.set(\"access\", accessToken);\r",
+									"        } else {\r",
+									"            console.error(\"accessToken not found in the response\");\r",
+									"        }\r",
+									"    } catch (error) {\r",
+									"        console.error(\"Error parsing response as JSON:\", error.message);\r",
+									"    }\r",
+									"} else {\r",
+									"    console.error(\"No response received\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\" : \"omar@saro.com\",\r\n    \"password\" : \"15643541Wqa$%f\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/logout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refresh acess token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTg5ZGZlOTY2ODM0YWI4NWFiZGM3YTUiLCJJQSI6ZmFsc2UsImlhdCI6MTcwODY5NTQwMCwiZXhwIjoxNzA4NzgxODAwfQ.k0mxEY3jyik81saASmv_0Np7sh_6gH1k_dk1sx4Y8EQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/refresh-token",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "change the current password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGVkMmVlODk0YzdhZDE4NTVmYjQ0MmUiLCJpYXQiOjE2OTMyNjU2NjQsImV4cCI6MTY5MzI2OTI2NH0.pdqbMwZ50pt9qNABITaXbV9aBw5MUja-cbPVUYRIVds",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldPassword\" : \"asa$ddsdfdfa5434%\",\r\n    \"newPassword\" : \"asa$ddsdfdfa5435%\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/change-password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "forgot password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    // issue otp request to this email\r\n    \"email\": \"omar@saro.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/forgot-password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reset password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    // pass the otp along with the email to verift ownership of the email so that (set new password)\r\n    \"email\":\"omar@saro.com\",\r\n    \"otp\": \"442679\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/reset-password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"reset-password"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTJiMmNmMDIwMDQwOGM1Zjg3ZjM4ZTciLCJpYXQiOjE2OTc5MzQxNzQsImV4cCI6MTY5NzkzNzc3NH0.8UB34oFiLOXvN9vRKXLoUFd87jbEW3KxsziHuTmn480",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "set new password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NGVjYWNmNWViM2M4YjMyMDdhOWE1ZmYiLCJpYXQiOjE2OTMyMzc1MjMsImV4cCI6MTY5MzI0MTEyM30.Umja7QiVV1XqqNnfOqdIb0LTes7y9_vU6YIZ1qnMIbE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newPassword\" : \"asa$ddsdfdfa5435%\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/set-new-password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"set-new-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "verify email by otp",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"omar@saro.com\",\r\n    \"otp\": \"423943\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/verify-email",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"verify-email"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "verify phone by otp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phone\" : \"+201000000000\",\r\n    \"otp\": \"470767\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/verify-phone",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"verify-phone"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "issue OTP through (mobile or email)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    //\"phone\": \"+201000000000\"\r\n    \"email\": \"omar@saro.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/issue-otp",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"issue-otp"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Loans",
+			"item": [
+				{
+					"name": "get all loans",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/loans/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"loans",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get loan by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/loans/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"loans",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "25"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add new Loan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"book_id\": 253,  //integer,\r\n  \"identity_id\": 21, // integer,\r\n  \"checkout_date\": \"2021-12-31\", //string based date -- format: '2021-12-31' - default: Today\r\n  \"due_date\": \"2022-01-07\"   //string based date -- format: '2021-12-31'\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/loans/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"loans",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update loan by ID",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"due_date\" : \"2022-01-08\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/loans/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"loans",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "25"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete loan by ID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/loans/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"loans",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "25"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get today's due loans",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/loans/due",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"loans",
+								"due"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get overdue loans (not returned books)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/loans/overdue",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"loans",
+								"overdue"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get loans by User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/loans/user/:userId",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"loans",
+								"user",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "21"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get loans by Book",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/loans/book/:bookId",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"loans",
+								"book",
+								":bookId"
+							],
+							"variable": [
+								{
+									"key": "bookId",
+									"value": "255"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Books",
+			"item": [
+				{
+					"name": "Books  - Get All",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/books/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"books",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Books - Get Book by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/books/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"books",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "255",
+									"description": "Book ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Book - Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"string\",\r\n    \"author\": \"string\",\r\n    \"isbn\": \"Should follow ISBN format\",\r\n    \"available_quantity\": 20,\r\n    \"shelf_location\": \"R-12\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/Books/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"Books",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Book - Update",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"author\": \"Jamal Samy\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/books/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"books",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "21",
+									"description": "Book's ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Book - Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/books/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"books",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "21",
+									"description": "Book's ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Books - Search",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"query\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/books/search",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"books",
+								"search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Book - Borrow",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/books/:id/checkout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"books",
+								":id",
+								"checkout"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "25",
+									"description": "Book Id to be borrowed"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Book - Return",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/books/:id/checkin",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"books",
+								":id",
+								"checkin"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "25",
+									"description": "Book Id to be return"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "http://localhost:4242",
+			"type": "string"
+		},
+		{
+			"key": "access",
+			"value": ""
+		}
+	]
+}
